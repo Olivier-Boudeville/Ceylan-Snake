@@ -1,41 +1,35 @@
-#!/bin/bash
+#!/bin/sh
+
+usage="Usage: $(basename $0) [--debug]: tests all available Python modules"
 
 
-SAGE="Usage : "`basename $0`" <module.py> [--debug]  : tests all available python modules.\nEx : "`basename $0`
-
-
-if [ "$1" == "--debug" ] ; then
-	do_debug=true
+if [ "$1" = "--debug" ]; then
+	do_debug=0
 else
-	do_debug=false
+	do_debug=1
 fi
 
 
-TESTED_MODULE_PATH=`dirname $(pwd)`
+tested_module_path=$(dirname $(pwd))
 
-export PYTHONPATH=${TESTED_MODULE_PATH}:$PYTHONPATH
+export PYTHONPATH=${tested_module_path}:$PYTHONPATH
 
 
-function DEBUG
-# Displays a debug message if debug mode is activated (do_debug=true).
-# Usage : DEBUG "message 1" "message 2" ...
+debug()
+# Displays a debug message if debug mode is activated (do_debug=0).
+# Usage: debug "message 1" "message 2" ...
 {
-	[ "$do_debug" == "false" ] || echo "Debug : $*"
+	[ $do_debug -eq 1 ] || echo "[Debug] $*"
 }
 
-echo
+echo "Testing all:"
 
-echo "Testing all :"
+for t in ${tested_module_path}/tests/*_test.py; do
 
-
-
-for f in $TESTED_MODULE_PATH/tests/test-*.py; do
-
-	echo 
-	echo "Testing $f :"
-	$f
+	echo
+	echo "Testing with $t:"
+	$t
 
 done
 
-
-echo "End of all tests"
+echo "End of all tests."

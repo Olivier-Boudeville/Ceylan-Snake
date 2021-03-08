@@ -1,123 +1,115 @@
 #!/usr/bin/env python
 
-__file__        = "introspection.py"
-__title__       = "This is the introspection module, made to retrieve easily informations about python objects."
+__title__       = "This is the introspection module, made to retrieve easily information about Python elements."
 __version__     = "0.2"
 __author__      = "Olivier Boudeville (olivier.boudeville@online.fr)"
 __project__     = "Ceylan"
 __creationDate__= "2001, August 23"
-__comments__    = "Use its own introspection capabilities to discover what this module can do !"
+__comments__    = "Use its own introspection capabilities to discover what this module can do!"
 __source__      = "Mark Pilgrim, http://diveintopython.org/, and al."
 __doc__         = __title__ + '\n' + __comments__
 
 
-# Original functions translated from Python 2.1 to Python 1.5.2 and, eventually, back in 2.1 !
+# Original functions translated from Python 2.1 to Python 1.5.2 and, eventually,
+# back in 2.1!
 
 import sys, string, inspect, toolbox
 
 
-def showDict(myDict, spacing=10, collapse=1):
-    """Affiche un dictionnaire, en plaçant sur la même ligne une clé et l'objet qui lui correspond"""
-    #"""Display a dictionnary in a user-friendly fashion, each line showing a key and its related object"""
-    tempList = []
+def show_dict(my_dict, spacing=10, collapse=1):
+    """Displays a dictionnary in a user-friendly fashion, each line showing a key and its related object"""
+    tmp_list = []
+    for item in my_dict.keys():
+        tmp_list.append("%s %s" % (string.ljust(item,spacing), my_dict[item]))
+    print( string.join(tmp_list, '\n') )
 
-    for item in myDict.keys():
-		tempList.append("%s %s" % (string.ljust(item,spacing), myDict[item]))
-    print string.join(tempList, '\n')
 
-    
-def showMethods(object, spacing=15, collapse=1):   
-    """Affiche les méthodes de l'objet spécifié et leur documentation __doc__"""
-    #"""Print methods and doc strings of object"""
-    
-    methodList = []
+def show_methods(object, spacing=15, collapse=1):
+    """Prints methods and doc strings of object"""
+
+    method_list = []
     for method in dir(object):
-    	if callable(getattr(object, method)):
-    		methodList.append(method)    	
-    processFunc = collapse and (lambda s: string.join(s.split(), ' ')) or (lambda s: s)
-    tempList = []
-    for method in methodList:
-        tempList.append("%s %s" % (string.ljust(method,spacing),str(getattr(object, method).__doc__)))        
-    print string.join(tempList, '\n')
-    
+        if callable(getattr(object, method)):
+            method_list.append(method)
+    tmp_list = []
+    for method in method_list:
+        tmp_list.append("%s %s" % (string.ljust(method,spacing),str(getattr(object, method).__doc__)))
+    print( string.join(tmp_list, '\n'))
 
-    
-def showDataMembers(object, spacing=10, collapse=1):   
-    """Affiche les données membres de l'objet spécifié et leur type"""
-    #"""Print data members of object, with their type"""
-    
-    dataList = []
+
+def show_data_members(object, spacing=10, collapse=1):
+    """Prints data members of object, with their type"""
+
+    data_list = []
     for member in dir(object):
-    	if not callable(getattr(object, member)):
-    		dataList.append(member)    	
-    processFunc = collapse and (lambda s: string.join(s.split(), ' ')) or (lambda s: s)
-    tempList = []
-    for member in dataList:
-        tempList.append("%s %s %s" % (string.ljust(member,spacing), type(member), str(member)))  
-    if len(tempList)==0:
-		print "No data attributes"
+        if not callable(getattr(object, member)):
+            data_list.append(member)
+    tmp_list = []
+    for member in data_list:
+        tmp_list.append("%s %s %s" % (string.ljust(member,spacing), type(member), str(member)))
+    if tmp_list:
+        print( string.join(tmp_list, '\n'))
     else:
-		print string.join(tempList, '\n')
-    
-    
-def showLoadedModules(spacing=10, collapse=1):   
-    #"""Affiche les modules actuellement chargés dans l'interpréteur"""
-    """Print methods and doc strings of object"""
-    
-    tempList=[]
+        print( "No data attributes")
+
+
+def show_loaded_modules(spacing=10, collapse=1):
+    """Prints the loaded modules"""
+
+    tmp_list=[]
     for item in sys.modules.keys():
-		tempList.append("%s %s" % (string.ljust(item,spacing), sys.modules[item]))
-    print string.join(tempList, '\n')
+        tmp_list.append("%s %s" % (string.ljust(item,spacing), sys.modules[item]))
+    print( string.join(tmp_list, '\n'))
 
 
-def showObjectSymbolTable(myObject):
-    #"""Affiche la table des symboles locaux de l'objet spécifié"""
-    """Display local object symbol table """
-    showDict(vars(myObject))        
+def show_object_symbol_table(my_object):
+    """Displays the local object symbol table"""
+    show_dict( vars(my_object) )
 
 
-def showCurrentLocalSymbolTable(spacing=10, collapse=1):
-    #"""Affiche la table des symboles locaux, avec leur type"""
-    """Show current local symbol table, with their type"""
-    tempList=[]
-    
+def show_current_local_symbol_table(spacing=10, collapse=1):
+    """Shows current local symbol table, with their type"""
+    tmp_list=[]
     for item in dir():
-		tempList.append("%s %s" % (string.ljust(item,spacing), type(item)))
-    print string.join(tempList, '\n')	
+        tmp_list.append("%s %s" % (string.ljust(item,spacing), type(item)))
+    print( string.join(tmp_list, '\n'))
 
 
-def inspectModule(myModule, spacing=10, collapse=1):
-	"""Affiche des informations sur un module"""
-	print "Description du module : ", myModule.__doc__
-	if myModule.__file__ is not None:
-		print "Défini dans le fichier :", myModule.__file__
-	tempList = []
-	print "Membres du modules : "
-	processFunc = collapse and (lambda s: string.join(s.split(), ' ')) or (lambda s: s)
-	print "\n".join(["%s %s" % (string.ljust(item[0],spacing), processFunc(str(item[1]))) for item in inspect.getmembers(myModule)])
-	    	
-def inspectClass(myClass, spacing=10, collapse=1):
-	"""Affiche des informations sur une classe"""
-	print "Description de la classe : ", myClass.__doc__
-	print "Définie dans le module : ", myClass.__module__
-	
-def inspectMethod(myMethod, spacing=15, collapse=1):
-	"""Affiche des informations sur une méthode"""
-	print "Nom : ", myMethod.__name__
-	print "Description de la méthode : ", myMethod.__doc__
-	print "Appartient à la classe : ", myMethod.im_class
-	print "Objet-fonction contenant cette méthode : ", myMethod.im_func
-	if myMethod.im_self is not None:
-		print "Liée à l'instance : ", im_self
-	
-def inspectFunction(myFunc, spacing=10, collapse=1):
-	"""Affiche des informations sur une fonction"""
-	print "Nom : ", myFunc.__name__	
-	print "Description de la fonction : ", myFunc.__doc__
-	print "Arguments par défaut : ", myFunc.func_defaults
-	print "Espace de nommage global dans lequel cette fonction est définie : ", myfunc.func_globals
+def inspect_module(my_module, spacing=10, collapse=1):
+    """Displays information regarding a module"""
+    print( "Module description: ", my_module.__doc__)
+    if my_module.__file__ is not None:
+        print( "Defined in file '%s'" % my_module.__file__)
+    tmp_list = []
+    print("Module members:")
+    process_func = collapse and (lambda s: string.join(s.split(), ' ')) or (lambda s: s)
+    print( "\n".join(["%s %s" % (string.ljust(item[0],spacing), process_func(str(item[1]))) for item in inspect.getmembers(my_module)]))
 
 
-    
-if __name__ == "__main__":                 
-   print __doc__
+def inspect_class(my_class, spacing=10, collapse=1):
+    """Displays information regarding a class"""
+    print( "Class description: ", my_class.__doc__)
+    print( "Defined in module: ", my_class.__module__)
+
+
+def inspect_method(my_method, spacing=15, collapse=1):
+    """Displays information regarding a method"""
+    print( "Name: ", my_method.__name__ )
+    print( "Method description: ", my_method.__doc__ )
+    print( "Belonging to class: ", my_method.im_class )
+    print( "Function-object containing this method: ", my_method.im_func )
+    if my_method.im_self is not None:
+        print( "Linked to instance: ", im_self )
+
+
+def inspect_function(my_func, spacing=10, collapse=1):
+    """Displays information regarding a function"""
+    print( "Name: ", my_func.__name__ )
+    print( "Function description: ", my_func.__doc__ )
+    print( "Default arguments: ", my_func.func_defaults )
+    print( "Global namespace of defintion: ", myfunc.func_globals )
+
+
+
+if __name__ == "__main__":
+   print( __doc__ )

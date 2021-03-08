@@ -1,6 +1,5 @@
 EXTRA_DIST = \
-	test-all.sh           \
-	test-fileUtils.py     \
-	test-generalUtils.py  \
-	testUtils.sh
-
+	test-all.sh            \
+	test-file-utils.py     \
+	test-general-utils.py  \
+	test-utils.sh

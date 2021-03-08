@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-__file__        = 'test-fileUtils.py'
 __title__       = 'This is the test of the file module.'
 __version__     = '0.1'
 __author__      = 'Olivier Boudeville (olivier.boudeville@online.fr)'
@@ -10,20 +9,14 @@ __comments__    = 'Testing module.'
 __source__      = 'OSDL (http://osdl.sourceforge.net)'
 __doc__         = __title__ + '\n' + __comments__
 
-__testTarget__  = 'fileUtils'
+__testTarget__  = 'file_utils'
 
 
-from generalUtils import *
+from general_utils import *
 
 
-print 'Beginning test of module %s.\n\n' % ( __testTarget__, )
+print('Beginning test of module %s.\n\n' % ( __testTarget__, ))
 
+print('Testing basic definitions...')
 
-print 'Testing basic definitions...'
-print
-
-
-
-print 'End of test for module %s.\n\n' % ( __testTarget__, )
-
-
+print('End of test for module %s.\n\n' % ( __testTarget__, ))

@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-__file__        = 'toolbox.py'
 __title__       = 'This is the toolbox module, convenient generic functions and classes for python.'
 __version__     = '0.1'
 __author__      = 'Olivier Boudeville (olivier.boudeville@online.fr)'
@@ -11,20 +10,17 @@ __source__      = 'Mark Pilgrim, http://diveintopython.org/, and al.'
 __doc__         = __title__ + '\n' + __comments__
 
 
-# Toolbox's code is being distributed among *Utils.py.
+# Toolbox's code is being distributed among *_utils.py.
 
 
-# Home-made ones :
-from generalUtils import * 
-from fileUtils import *
+# Home-made ones:
+from general_utils import *
+from file_utils import *
 
 
+class ToolboxException(GeneralUtilsException):
+    """Base class for toolbox exceptions."""
 
-class ToolboxException( GeneralUtilsException ) :
-    """Base class for toolbox exceptions.""" 
 
-
-if __name__ == "__main__":        
-	print __doc__
-
-		
+if __name__ == "__main__":
+    print( __doc__)
