@@ -129,7 +129,7 @@ class Node:
             """Sets a new content to current node, which must not have already
             a content."""
             if self.content:
-                raise ValueError, "Node.set_content: content already assigned."
+                raise ValueError("Node.set_content: content already assigned.")
             self.content = node_content
 
 
@@ -217,8 +217,8 @@ class Node:
 
         def display(self):
             """Displays this node."""
-            print 'content  = %s' % (self.content,)
-            print 'children = %s' % (self.children,)
+            print('content  = %s' % (self.content,))
+            print('children = %s' % (self.children,))
 
 
 
@@ -233,7 +233,7 @@ if __name__ == "__main__":
 
     import startup
     #output_device = general_utils.screen_display()
-    print __doc__
+    print(__doc__)
 
     a = NodeExample( 'a' )
     b = NodeExample( 'b' )
@@ -255,26 +255,26 @@ if __name__ == "__main__":
     d.add_child( f )
     a.add_child( g )
 
-    print a.to_string()
+    print(a.to_string())
 
-    u = a.search_content( 'd' )
-    print 'Searching for content d: %s' % ( u, )
-    print
+    u = a.search_content('d')
+    print('Searching for content d: %s' % (u,))
+    print()
 
-    path = a.search_path_to_content( 'd' )
-    print 'Searching path from content d to root: '
-    general_utils.display_list( path )
-    print
+    path = a.search_path_to_content('d')
+    print('Searching path from content d to root: ')
+    general_utils.display_list(path)
+    print()
 
 
     l = a.list_depth_first()
-    print 'Listing content tree depth-first, starting from root node:'
-    general_utils.display_list( l )
-    print '(size of list: %s)' % ( len(l),)
-    print
+    print('Listing content tree depth-first, starting from root node:')
+    general_utils.display_list(l)
+    print('(size of list: %s)' % (len(l),))
+    print()
 
     m = a.list_by_height()
-    print 'Listing content tree by increasing height, starting from root node:'
-    general_utils.display_list( m )
-    print '(size of list: %s)' % ( len(m),)
-    print
+    print('Listing content tree by increasing height, starting from root node:')
+    general_utils.display_list(m)
+    print('(size of list: %s)' % (len(m),))
+    print()

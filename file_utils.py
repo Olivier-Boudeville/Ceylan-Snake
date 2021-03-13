@@ -38,7 +38,7 @@ def update_config_from_file(cfg_dic, cfg_file):
 
         return cfg_dic
     for opt in opts_list:
-        if cfg_dic.has_key(opt):
+        if opt in cfg_dic:
             #print( "Setting option %s" % (opt,))
             cfg_dic[opt] = my_parser.get('Options', opt)
         else:
@@ -221,8 +221,8 @@ def get_all_relative_file_paths_helper(dir_suffix_name, base_root):
 def get_md5_for(file_path):
     """"Returns the MD5 code corresponding to the file at specified path."""
     check_file(file_path)
-    scanned_file = file(file_path, 'rb')
-    return hashlib.md5( scanned_file.read() ).hexdigest()
+    with open(file_path, 'rb') as scanned_f:
+        return hashlib.md5( scanned_f.read() ).hexdigest()
 
 
 def backup(file_to_backup):

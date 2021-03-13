@@ -38,7 +38,7 @@ def display_dic(dic):
     # Find longest key:
     max_len = 0
     for k in dic.keys():
-        l = len(K)
+        l = len(k)
         if l > max_len:
             max_len = l
     # First field shoud have the width of the longest key item:
@@ -79,8 +79,8 @@ class Display:
                 - 2: all messages are displayed
             """
 
-        self.esp = spacing and (lambda s, space_num=spacing: str.ljust(s, space_num) ) or (lambda s: s)
-        self.comp = compression and (lambda s: " ".join( s.split() ) ) or (lambda s: s)
+        self.esp = spacing and (lambda s, space_num=spacing: str.ljust(s, space_num)) or (lambda s: s)
+        self.comp = compression and (lambda s: " ".join(s.split())) or (lambda s: s)
         self.trunc = truncate and (lambda s, trunc_num=truncate: s[:trunc_num]) or (lambda s: s)
         self.verb = verbosity
         self.offset = 0
@@ -89,42 +89,42 @@ class Display:
     def display(self, message, add_return=True):
         """Displays unconditionnally specified normal message."""
         if add_return:
-            self.inner_display_normal( self.normal_prefix + self.offset * ' ' + message + '\n' )
+            self.inner_display_normal(self.normal_prefix + self.offset * ' ' + message + '\n')
         else:
-            self.inner_display_normal( self.normal_prefix + self.offset * ' ' + message )
+            self.inner_display_normal(self.normal_prefix + self.offset * ' ' + message)
 
 
     def info(self, message, add_return=True):
         """Displays specified information message."""
         if add_return:
-            self.inner_display_normal( self.info_prefix + message + '\n' )
+            self.inner_display_normal(self.info_prefix + message + '\n')
         else:
-            self.inner_display_normal( self.info_prefix + message )
+            self.inner_display_normal(self.info_prefix + message)
 
 
     def debug(self, message, add_return=True):
         """Displays specified debug message if and only if we are in debug mode."""
         if self.do_debug:
             if add_return:
-                self.inner_display_normal( self.debug_prefix + message + '\n' )
+                self.inner_display_normal(self.debug_prefix + message + '\n')
             else:
-                self.inner_display_normal( self.debug_prefix + message )
+                self.inner_display_normal(self.debug_prefix + message)
 
 
     def warning(self, message, add_return=True):
         """Displays specified warning message."""
         if add_return:
-            self.inner_display_error( self.warning_prefix + message + '\n' )
+            self.inner_display_error(self.warning_prefix + message + '\n')
         else:
-            self.inner_display_error( self.warning_prefix + message )
+            self.inner_display_error(self.warning_prefix + message)
 
 
     def error(self, message, add_return=True):
         """Displays specified error message."""
         if add_return:
-            self.inner_display_error( self.error_prefix + message + '\n' )
+            self.inner_display_error(self.error_prefix + message + '\n')
         else:
-            self.inner_display_error( self.error_prefix + message )
+            self.inner_display_error(self.error_prefix + message)
 
 
     def inner_display_normal(self, message):
@@ -149,17 +149,17 @@ class Display:
 
     def blank_line(self):
         if self.verb == 2:
-            self.inner_display_normal( '\n' )
+            self.inner_display_normal('\n')
 
 
     def status(self):
-        self.inner_display_normal( 'Verbosity level is %s.' % ( self.verb, ) )
+        self.inner_display_normal('Verbosity level is %s.' % (self.verb,))
 
 
     def __call__(self, message, add_return=True):
         if type(message) == str:
-            if self.verb == 2 or ( ( self.verb == 1 ) and ( message[:2] == self.prefix_for_key_messages ) ):
-                self.display( self.esp( self.trunc( self.comp( message ) ) ), add_return )
+            if self.verb == 2 or ((self.verb == 1) and (message[:2] == self.prefix_for_key_messages)):
+                self.display(self.esp(self.trunc(self.comp(message))), add_return)
         elif type(message) in [list,tuple]:
             for item in message:
                 self.__call__(item, add_return)
@@ -185,13 +185,13 @@ class ScreenDisplay(Display):
 
     def inner_display_normal(self, message):
         """Displays a message to standard output file descriptor."""
-        sys.stdout.write( message )
+        sys.stdout.write(message)
         sys.stdout.flush()
 
 
     def inner_display_error(self, message):
         """Displays a message to error output file descriptor."""
-        sys.stderr.write( message )
+        sys.stderr.write(message)
         sys.stderr.flush()
 
 
@@ -211,14 +211,14 @@ class FileDisplay(Display):
             - the other parameters have the same semantics as the Display ones
         """
 
-        Display.__init__( self, spacing=10, compression=True, truncate=False, verbosity=2 )
+        Display.__init__(self, spacing=10, compression=True, truncate=False, verbosity=2)
         self.log_base_name = log_base_name
         self.allow_overwrite = allow_overwrite
         self.log_filename = self.log_base_name + "." + self.default_extension
         if self.allow_overwrite:
-            self.log_file = open( self.log_filename, 'w' )
+            self.log_file = open(self.log_filename, 'w')
         else:
-            self.log_file = open( self.log_filename, 'a' )
+            self.log_file = open(self.log_filename, 'a')
         self.status()
 
 
@@ -229,11 +229,11 @@ class FileDisplay(Display):
 
 
     def inner_display_normal(self, message):
-        self.log_file.write( message + '\n' )
+        self.log_file.write(message + '\n')
         self.log_file.flush()
 
     def inner_display_error(self, message):
-        self.log_file.write( message + '\n' )
+        self.log_file.write(message + '\n')
         self.log_file.flush()
 
     def remove(self):
@@ -245,8 +245,8 @@ class FileDisplay(Display):
             os.remove(self.log_filename)
 
 if __name__ == "__main__":
-    if len( sys.argv ) != 2:
-        print( __doc__ )
+    if len(sys.argv) != 2:
+        print(__doc__)
     else:
         temp = ScreenDisplay()
-        temp( sys.argv[1] )
+        temp(sys.argv[1])

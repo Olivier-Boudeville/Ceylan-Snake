@@ -8,7 +8,8 @@ import os, os.path, sys, string, shutil, tempfile, file_utils, time
 
 
 __doc__ = """
-Usage: tree-file-compare.py [-h|--help] [-v|--verbose] [-r|--reverse] [--by-name-only] --reference APath [--mirror AnotherPath]
+Usage: tree-file-compare.py [-h|--help] [-v|--verbose] [-r|--reverse] [--by-name-only] --reference A_PATH [--mirror ANOTHER_PATH]
+
 Will scan first specified tree, in search for duplicated files (same content, different paths). The resulting associations will be stored in ~/*-tree-file-compare.log files. If a second tree is specified (--mirror option), then will look for files whose content is in second tree but not in the first one, to ensure the reference tree is complete.
 
 This script is useful to ensure a reference tree does not lack any content from a mirror and to know whether the mirror is up-to-date.
@@ -78,7 +79,7 @@ def build_file_index_for(path):
         # First scan the content:
         md5 = file_utils.get_md5_for(full_path)
 
-        if content_dic.has_key(md5):
+        if md5 in content_dic:
             content_dic[md5] += [f]
         else:
             content_dic[md5] = [f]
@@ -86,13 +87,13 @@ def build_file_index_for(path):
         # Then scan the filenames:
         name = os.path.basename(f)
 
-        if name_dic.has_key(name):
+        if name in name_dic:
             name_dic[name] += [f]
         else:
             name_dic[name] = [f]
 
-    #print( "File content index: '%s'." % (content_dic,))
-    #print( "File name index: '%s'." % (name_dic,))
+    #print("File content index: '%s'." % (content_dic,))
+    #print("File name index: '%s'." % (name_dic,))
 
     return (content_dic, name_dic)
 
@@ -114,12 +115,12 @@ def build_name_index_for(path):
         # Scan the filenames:
         name = os.path.basename(f)
 
-        if name_dic.has_key(name):
+        if name in name_dic:
             name_dic[name] += [f]
         else:
             name_dic[name] = [f]
 
-        #print( "File name index = %s." % (name_dic,))
+        #print("File name index = %s." % (name_dic,))
 
         return name_dic
 
@@ -154,7 +155,7 @@ def compare_content_trees(ref_content_index, mirror_content_index):
     output("Comparing reference tree with mirror tree:")
     for k in ref_content_index.keys():
         ref_files = ref_content_index[k]
-        if mirror_content_index.has_key(k):
+        if k in mirror_content_index:
             mirror_files = mirror_content_index[k]
             if mirror_files != ref_files:
                 #print("For content whose MD5 code is %s, reference tells: %s, whereas mirror tells: %s." % (k,ref_files,mirror_files))
@@ -171,14 +172,14 @@ def compare_name_trees(ref_name_index, mirror_name_index):
     output("Comparing reference tree with mirror tree:")
     for k in ref_name_index.keys():
         ref_files = ref_name_index[k]
-        if mirror_name_index.has_key(k):
+        if k in mirror_name_index:
             mirror_files = mirror_name_index[k]
             if mirror_files != ref_files:
-                #print( "For name %s, reference tells: %s, whereas mirror tells: %s." % (k,ref_files,mirror_files))
+                #print("For name %s, reference tells: %s, whereas mirror tells: %s." % (k,ref_files,mirror_files))
                 output("  + identical name for %s in reference and %s in mirror." % (ref_files,mirror_files))
             else:
-                #print( "Name %s is in reference as %s, whereas mirror does not have it." % (k,ref_files))
-                output( "  (name corresponding to %s is in reference but not in mirror)" % (ref_files,) )
+                #print("Name %s is in reference as %s, whereas mirror does not have it." % (k,ref_files))
+                output("  (name corresponding to %s is in reference but not in mirror)" % (ref_files,) )
         output("")
 
 
@@ -187,9 +188,9 @@ def check_content_completeness(ref_content_index, mirror_content_index):
     """Checks that all content of mirror tree is in reference tree, preferably with the same filenames."""
     output("Checking completeness of reference regarding the mirror:")
     for k in mirror_content_index.keys():
-        if not ref_content_index.has_key(k):
-            #print( "Content whose MD5 code is %s is referenced in the mirror tree, as %s, and not available in reference." % (k,mirror_content_index[k]))
-            output( "  + content corresponding to %s is in mirror but not in reference." % (mirror_content_index[k],) )
+        if not k in ref_content_index:
+            #print("Content whose MD5 code is %s is referenced in the mirror tree, as %s, and not available in reference." % (k,mirror_content_index[k]))
+            output("  + content corresponding to %s is in mirror but not in reference." % (mirror_content_index[k],) )
         output("")
 
 
@@ -198,9 +199,9 @@ def check_mirror_completeness(ref_content_index, mirror_content_index):
     """Checks that all content of reference tree is in mirror tree, preferably with the same filenames."""
     output("Checking completeness of mirror regarding the reference:")
     for k in ref_content_index.keys():
-        if not mirror_content_index.has_key(k):
-            #print( "Content whose MD5 code is %s is referenced in the reference tree, as %s, and not available in mirror." % (k,mirror_content_index[k]))
-            output( "  + content corresponding to %s is in reference  but not in mirror." % (ref_content_index[k],) )
+        if not k in mirror_content_index:
+            #print("Content whose MD5 code is %s is referenced in the reference tree, as %s, and not available in mirror." % (k,mirror_content_index[k]))
+            output("  + content corresponding to %s is in reference  but not in mirror." % (ref_content_index[k],) )
         output("")
 
 
@@ -209,9 +210,9 @@ def check_name_completeness(ref_name_index, mirror_name_index):
     """Checks that all name of mirror tree is in reference tree, preferably with the same filenames."""
     output("Checking completeness of reference regarding the mirror:")
     for k in mirror_name_index.keys():
-        if not ref_name_index.has_key(k):
-            #print( "Content whose MD5 code is %s is referenced in the mirror tree, as %s, and not available in reference." % (k,mirror_name_index[k]))
-            output("  + name corresponding to %s is in mirror but not in reference." % (mirror_name_index[k],) )
+        if not k in ref_name_index:
+            #print("Content whose MD5 code is %s is referenced in the mirror tree, as %s, and not available in reference." % (k,mirror_name_index[k]))
+            output("  + name corresponding to %s is in mirror but not in reference." % (mirror_name_index[k],))
         output("")
 
 
@@ -221,15 +222,15 @@ def detect_common_content(ref_content_index, mirror_content_index):
     Common files are detected in terms of content."""
     output("Looking for duplicated content between reference and mirror:")
     for k in mirror_content_index.keys():
-        if ref_content_index.has_key(k):
-            output( "  + content corresponding to %s in mirror is also in reference, as %s." % (mirror_content_index[k],ref_content_index[k]) )
+        if k in ref_content_index:
+            output("  + content corresponding to %s in mirror is also in reference, as %s." % (mirror_content_index[k],ref_content_index[k]))
     output("")
 
     # Would be useless as we are only looking for duplicates here:
     #output("Checking mirror tree against reference files, in terms of content:")
     #for k in ref_content_index.keys():
-    #	if mirror_content_index.has_key(k):
-    #		output( "  + content corresponding to %s in reference is also in mirror, as %s." % (ref_content_index[k],mirror_content_index[k]) )
+    #	if k in mirror_content_index:
+    #	    output("  + content corresponding to %s in reference is also in mirror, as %s." % (ref_content_index[k],mirror_content_index[k]))
     #output("")
 
 
@@ -239,14 +240,14 @@ def detect_common_name(ref_name_index, mirror_name_index):
     Common files are detected in terms of name."""
     output("Looking for duplicated names between reference and mirror:")
     for k in mirror_name_index.keys():
-        if ref_name_index.has_key(k):
-            output( "  + name %s in in mirror, as %s, and in reference, as %s." % (k, mirror_name_index[k],ref_name_index[k]) )
+        if k in ref_name_index:
+            output("  + name %s in in mirror, as %s, and in reference, as %s." % (k, mirror_name_index[k],ref_name_index[k]))
     output("")
     # Would be useless as we are only looking for duplicates here:
     #output("Checking mirror tree against reference files, in terms of name:")
     #for k in ref_name_index.keys():
-    #	if mirror_name_index.has_key(k):
-    #		output( "  + content corresponding to %s in reference is also in mirror, as %s." % (ref_name_index[k],mirror_name_index[k]) )
+    #	if k in mirror_name_index:
+    #	    output("  + content corresponding to %s in reference is also in mirror, as %s." % (ref_name_index[k],mirror_name_index[k]))
     #output("")
 
 
@@ -255,7 +256,7 @@ def write_hashes(log_file, content_index):
     """Writes specified content index in specified log file."""
     log_file.write("Hashes:\n\n")
     for k in content_index.keys():
-        log_file.write( "  %s %s\n" % (k,content_index[k]))
+        log_file.write("  %s %s\n" % (k,content_index[k]))
     log_file.write("\n")
 
 
@@ -285,6 +286,11 @@ if __name__ == '__main__':
 
     reference_path = None
     mirror_path = None
+
+    if not sys.argv:
+        print("Error, no parameter specified.")
+        print(__doc__)
+        sys.exit(1)
 
     while len(sys.argv):
 
@@ -341,7 +347,7 @@ if __name__ == '__main__':
 
         log_file = open(log_filename, "w")
 
-        log_file.write( "Report generated on %s.\n" % (time.strftime("%a, %d %B %Y %H:%M:%S", time.gmtime()),))
+        log_file.write("Report generated on %s.\n" % (time.strftime("%a, %d %B %Y %H:%M:%S", time.gmtime()),))
 
         log_file.write("Arguments specified: %s" % (saved_args,))
 
