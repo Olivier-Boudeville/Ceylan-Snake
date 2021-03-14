@@ -78,7 +78,7 @@ class Node:
         branch_next  = ' |_ '
         branch_last  = ''
 
-        node_text = string.ljust('%s' % (self.content,), next_offset - offset + 1)
+        node_text = ('%s' % (self.content,)).ljust(next_offset - offset + 1)
 
         if is_first_child:
             res += branch_first + node_text
@@ -105,120 +105,120 @@ class Node:
         return res
 
 
-        def add_child(self, child):
-            """Adds a child to current node."""
-            self.children.append(child)
+    def add_child(self, child):
+        """Adds a child to current node."""
+        self.children.append(child)
 
 
-        def remove_child(self, child):
-            """Removes specified child; raises an exception if this child
-            is not found."""
-            self.children.remove(child)
+    def remove_child(self, child):
+        """Removes specified child; raises an exception if this child
+        is not found."""
+        self.children.remove(child)
 
 
-        def remove_all_children(self):
-            self.children = None
+    def remove_all_children(self):
+        self.children = None
 
 
-        def get_children(self):
-            """Returns this node's children."""
-            return self.children
+    def get_children(self):
+        """Returns this node's children."""
+        return self.children
 
 
-        def set_content(self, node_content):
-            """Sets a new content to current node, which must not have already
-            a content."""
-            if self.content:
-                raise ValueError("Node.set_content: content already assigned.")
-            self.content = node_content
+    def set_content(self, node_content):
+        """Sets a new content to current node, which must not have already
+        a content."""
+        if self.content:
+            raise ValueError("Node.set_content: content already assigned.")
+        self.content = node_content
 
 
-        def get_content(self):
-            """Returns this node's current content."""
-            return self.content
+    def get_content(self):
+        """Returns this node's current content."""
+        return self.content
 
 
-        def drop_content(self):
-            """Removes this node's content."""
-            self.content = None
+    def drop_content(self):
+        """Removes this node's content."""
+        self.content = None
 
 
-        def search_children(self, content):
-            """Searches through node's children the first, if any, that has "
-            specified content."""
+    def search_children(self, content):
+        """Searches through node's children the first, if any, that has "
+        specified content."""
+        for c in self.children:
+            if c.content == content:
+                return c
+        return None
+
+
+    def list_depth_first(self):
+        """
+        Walks the tree depth-first, returns the list of encountered nodes.
+        """
+        res = [self]
+        for c in self.children:
+            res += c.list_depth_first()
+        return res
+        #return [ self ] + c.list_depth_first() for c in self.children ]
+
+
+    def list_by_height(self, first=True):
+        """
+        Walks the tree by increasing height, starting from root node, and
+        returns the list of encountered nodes.
+        """
+        res = []
+        if first:
+            res = [ self ]
+        res += self.children
+        for c in self.children:
+            res += c.list_by_height( False )
+        return res
+
+
+    def search_content(self, content):
+        """
+        Searches through internal content and then recursively through
+        children for specified content.
+        Returns the first node found having the content, if any, otherwise,
+        returns None.
+        content -> list of nodes
+        """
+        #output_device.debug( "Comparing target ('%s') with content '%s'." % (content, self.content))
+        if content == self.content:
+            return self
+        else:
             for c in self.children:
-                if c.content == content:
-                    return c
+                res = c.search_content(content)
+                if res:
+                    return res
             return None
 
 
-        def list_depth_first(self):
-            """
-            Walks the tree depth-first, returns the list of encountered nodes.
-            """
-            res = [self]
-            for c in self.children:
-                res += c.list_depth_first()
-            return res
-            #return [ self ] + c.list_depth_first() for c in self.children ]
+    def search_path_to_content(self, content):
+        """
+        Returns, if possible, the path from the first found node whose
+        content matches specified content to root node.
+        """
+        if content == self.content:
+            #output_device.debug( "Content found for '%s'." % (self,) )
+            return [ self ]
+        else:
+            #output_device.debug("Recursing from '%s'." % (self,))
+            for child in self.children:
+                res = child.search_path_to_content(content)
+                if res:
+                    res.append( self )
+                    #output_device.debug( "Returning '%s'." % (res,) )
+                    return res
+            return None
 
 
-        def list_by_height(self, first=True):
-            """
-            Walks the tree by increasing height, starting from root node, and
-            returns the list of encountered nodes.
-            """
-            res = []
-            if first:
-                res = [ self ]
-            res += self.children
-            for c in self.children:
-                res += c.list_by_height( False )
-            return res
-
-
-        def search_content(self, content):
-            """
-            Searches through internal content and then recursively through
-            children for specified content.
-            Returns the first node found having the content, if any, otherwise,
-            returns None.
-            content -> list of nodes
-            """
-            #output_device.debug( "Comparing target ('%s') with content '%s'." % (content, self.content))
-            if content == self.content:
-                return self
-            else:
-                for c in self.children:
-                    res = c.search_content(content)
-                    if res:
-                        return res
-                return None
-
-
-        def search_path_to_content(self, content):
-            """
-            Returns, if possible, the path from the first found node whose
-            content matches specified content to root node.
-            """
-            if content == self.content:
-                #output_device.debug( "Content found for '%s'." % (self,) )
-                return [ self ]
-            else:
-                #output_device.debug("Recursing from '%s'." % (self,))
-                for child in self.children:
-                    res = child.search_path_to_content(content)
-                    if res:
-                        res.append( self )
-                        #output_device.debug( "Returning '%s'." % (res,) )
-                        return res
-                return None
-
-
-        def display(self):
-            """Displays this node."""
-            print('content  = %s' % (self.content,))
-            print('children = %s' % (self.children,))
+    def display(self):
+        """Displays this node."""
+        print('content  = %s' % (self.content,))
+        print('children = %s' % (self.children,))
 
 
 
