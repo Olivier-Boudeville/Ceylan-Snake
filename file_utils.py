@@ -11,7 +11,7 @@ __doc__         = __title__ + '\n' + __comments__
 
 
 # Import standard python modules:
-import sys, types, string, os, os.path, configparser, hashlib
+import sys, types, string, os, os.path, configparser, hashlib, re
 
 # Import self-made modules:
 from general_utils import *
@@ -23,26 +23,40 @@ class FileUtilsException(GeneralUtilsException):
 
 def update_config_from_file(cfg_dic, cfg_file):
     """
-    Updates configuration dictionary 'cfg_dic' with informations found in file 'cfg_file'.
-    Warning: uppercase letters should not be used in configuration files, since ConfigParser
-    downcases them.
+    Updates configuration dictionary 'cfg_dic' with informations found in file
+    'cfg_file'.
+
+    Warning: uppercase letters should not be used in configuration files, since
+    ConfigParser downcases them.
     """
 
     try:
         my_parser = configparser.ConfigParser()
         my_parser.read(cfg_file)
-        opts_list = my_parser.options( 'Options' )
-        #print( "Option list is %s." % (opts_list,))
+        opts_list = my_parser.options('Options')
+        #print("Option list is %s." % (opts_list,))
     except:
-        print("Cannot open or read configuration file '%s'. Using default settings." % ( cfg_file, ), file=sys.stderr)
-
+        print("Cannot open or read configuration file '%s'. Using default settings." % (cfg_file,), file=sys.stderr)
         return cfg_dic
+
     for opt in opts_list:
         if opt in cfg_dic:
-            #print( "Setting option %s" % (opt,))
+            #print("Setting option %s" % (opt,))
             cfg_dic[opt] = my_parser.get('Options', opt)
         else:
             print("Warning: ignoring option '%s', found in configuration file but not registered." % (opt,))
+
+
+def to_filename(some_string):
+    """
+    Transforms specified string into a legit filename.
+    """
+
+    # Inspired from
+    # https://github.com/django/django/blob/main/django/utils/text.py:
+
+    s = str(some_string).strip().replace(' ', '_')
+    return re.sub(r'(?u)[^-\w.]', '', s)
 
 
 def find_next_new_dir_name(dest_prefix):
@@ -53,9 +67,9 @@ def find_next_new_dir_name(dest_prefix):
     """
     dir_count = 0
     dest_dir = dest_prefix
-    while os.path.exists( dest_dir ):
+    while os.path.exists(dest_dir):
         dir_count += 1
-        dest_dir = '%s%s%s' % ( dest_prefix, '-' , str( dir_count ) )
+        dest_dir = '%s%s%s' % (dest_prefix, '-' , str(dir_count))
     return dest_dir
 
 
@@ -65,7 +79,7 @@ def check_directory(dir_name):
 
         if not os.path.exists(dir_name):
             raise FileUtilsException("Cannot find directory '%s'." % (dir_name,))
-        if not os.path.isdir(dir_name ):
+        if not os.path.isdir(dir_name):
             raise FileUtilsException("'%s' is not a directory." % (dir_name,))
         return dir_name
 
@@ -90,7 +104,7 @@ def do_all_files_exist(filenames):
     """Returns true if and only if all files in the list exist."""
     for f in filenames:
         if not os.path.isfile(f):
-            display.debug( 'File %s does not exist.', f )
+            #print("File %s does not exist." % (f,))
             return False
     return True
 
@@ -123,15 +137,15 @@ def get_children_dirs(dir_name):
     Returns a list made of the (relative) names of the children directories
     of dir_name.
     """
-    return [elem for elem in os.listdir(dir_name) if os.path.isdir( os.path.join( dir_name, elem ) )]
+    return [elem for elem in os.listdir(dir_name) if os.path.isdir(os.path.join(dir_name, elem))]
 
 
 def get_files_in_dir(dir_name):
     """Returns a list made of the (relative) names of the files in directory dir_name."""
-    #return [ elem for elem in os.listdir( dir_name ) if os.path.isfile( os.path.join( dir_name, elem) ) ]
+    #return [ elem for elem in os.listdir(dir_name) if os.path.isfile(os.path.join(dir_name, elem)) ]
     files = []
     for elem in os.listdir(dir_name):
-        if os.path.isfile( os.path.join(dir_name, elem) ):
+        if os.path.isfile(os.path.join(dir_name, elem)):
             files.append(elem)
     return files
 
@@ -144,11 +158,11 @@ def get_dir_elements(dir_name):
     """
     directories = []
     files = []
-    for elem in os.listdir( dir_name ):
-        if os.path.isdir( os.path.join( dir_name, elem) ):
-            directories.append( elem )
-        elif os.path.isfile( os.path.join( dir_name, elem) ):
-            files.append( elem )
+    for elem in os.listdir(dir_name):
+        if os.path.isdir(os.path.join(dir_name, elem)):
+            directories.append(elem)
+        elif os.path.isfile(os.path.join(dir_name, elem)):
+            files.append(elem)
         else:
             raise FileUtilsException("In directory '%s', '%s' was found being neither directory or file." % (dir_name,elem))
     return directories, files
@@ -191,7 +205,7 @@ def get_all_file_paths_from(dir_name):
     local_files = [os.path.join(dir_name,d) for d in get_files_in_dir(dir_name)]
 
     for d in subdirs:
-        local_files += get_all_file_paths_from( os.path.join(dir_name,d) )
+        local_files += get_all_file_paths_from(os.path.join(dir_name,d))
 
     return local_files
 
@@ -213,7 +227,7 @@ def get_all_relative_file_paths_helper(dir_suffix_name, base_root):
     local_files = [os.path.join(dir_suffix_name, f) for f in get_files_in_dir(complete_dir)]
 
     for d in subdirs:
-        local_files += get_all_relative_file_paths_helper( os.path.join(dir_suffix_name, d), base_root)
+        local_files += get_all_relative_file_paths_helper(os.path.join(dir_suffix_name, d), base_root)
 
     return local_files
 
@@ -222,7 +236,7 @@ def get_md5_for(file_path):
     """"Returns the MD5 code corresponding to the file at specified path."""
     check_file(file_path)
     with open(file_path, 'rb') as scanned_f:
-        return hashlib.md5( scanned_f.read() ).hexdigest()
+        return hashlib.md5(scanned_f.read()).hexdigest()
 
 
 def backup(file_to_backup):
@@ -236,14 +250,14 @@ def backup(file_to_backup):
 
     if os.path.exists(backup_file):
         try:
-            os.remove( backup_file )
+            os.remove(backup_file)
         except OSError:
             print("Cannot remove '%s'." % (backup_file,), file=sys.stderr)
         return sys.exc_info()
 
-    if os.path.exists( file_to_backup ):
+    if os.path.exists(file_to_backup):
         try:
-            os.rename( file_to_backup, backup_file )
+            os.rename(file_to_backup, backup_file)
         except OSError:
             print("Cannot rename '%s'." % (file_to_backup,), file=sys.stderr)
         return sys.exc_info()
@@ -251,4 +265,4 @@ def backup(file_to_backup):
 
 
 if __name__ == "__main__":
-    print( __doc__ )
+    print(__doc__)
