@@ -20,7 +20,7 @@ def show_dict(my_dict, spacing=10, collapse=1):
     """Displays a dictionnary in a user-friendly fashion, each line showing a key and its related object"""
     tmp_list = []
     for item in my_dict.keys():
-        tmp_list.append("%s %s" % (string.ljust(item,spacing), my_dict[item]))
+        tmp_list.append("%s %s" % (item.ljust(spacing), my_dict[item]))
     print( string.join(tmp_list, '\n') )
 
 
@@ -33,7 +33,7 @@ def show_methods(object, spacing=15, collapse=1):
             method_list.append(method)
     tmp_list = []
     for method in method_list:
-        tmp_list.append("%s %s" % (string.ljust(method,spacing),str(getattr(object, method).__doc__)))
+        tmp_list.append("%s %s" % (method.ljust(spacing),str(getattr(object, method).__doc__)))
     print( string.join(tmp_list, '\n'))
 
 
@@ -46,7 +46,7 @@ def show_data_members(object, spacing=10, collapse=1):
             data_list.append(member)
     tmp_list = []
     for member in data_list:
-        tmp_list.append("%s %s %s" % (string.ljust(member,spacing), type(member), str(member)))
+        tmp_list.append("%s %s %s" % (member.ljust(spacing), type(member), str(member)))
     if tmp_list:
         print( string.join(tmp_list, '\n'))
     else:
@@ -58,7 +58,7 @@ def show_loaded_modules(spacing=10, collapse=1):
 
     tmp_list=[]
     for item in sys.modules.keys():
-        tmp_list.append("%s %s" % (string.ljust(item,spacing), sys.modules[item]))
+        tmp_list.append("%s %s" % (item.ljust(spacing), sys.modules[item]))
     print( string.join(tmp_list, '\n'))
 
 
@@ -71,7 +71,7 @@ def show_current_local_symbol_table(spacing=10, collapse=1):
     """Shows current local symbol table, with their type"""
     tmp_list=[]
     for item in dir():
-        tmp_list.append("%s %s" % (string.ljust(item,spacing), type(item)))
+        tmp_list.append("%s %s" % (item.ljust(spacing), type(item)))
     print( string.join(tmp_list, '\n'))
 
 
@@ -83,7 +83,7 @@ def inspect_module(my_module, spacing=10, collapse=1):
     tmp_list = []
     print("Module members:")
     process_func = collapse and (lambda s: string.join(s.split(), ' ')) or (lambda s: s)
-    print( "\n".join(["%s %s" % (string.ljust(item[0],spacing), process_func(str(item[1]))) for item in inspect.getmembers(my_module)]))
+    print( "\n".join(["%s %s" % (item[0].ljust(spacing), process_func(str(item[1]))) for item in inspect.getmembers(my_module)]))
 
 
 def inspect_class(my_class, spacing=10, collapse=1):
