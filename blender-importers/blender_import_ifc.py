@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+# Script to import IFC files in Blender.
+
 # This script is not meant to be directly executed / interpreted; it is expected
 # to be run as:
 
@@ -24,12 +26,13 @@ ifc_file = os.path.abspath(sys.argv[-1])
 
 if os.path.isfile(ifc_file):
 
-    # Not relevant here to remove the default elements (prevents the BIM add-on
-    # from being functional):
+    # Not wanting the default collection (with a default cube, light and
+    # camera), yet 'bpy.ops.wm.read_factory_settings(use_empty=True)' induces
+    # too much side-effects; so doing it manually then:
     #
-    #bpy.ops.wm.read_factory_settings(use_empty=True)
+    #objs = bpy.data.objects
+    #[objs.remove(objs[obj], do_unlink=True) for obj in ["Cube", "Light", "Camera"] 
 
-    # Doing it manually then:
     default_collection = bpy.data.collections.get('Collection')
 
     for obj in default_collection.objects:
