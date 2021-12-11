@@ -31,7 +31,7 @@ if os.path.isfile(ifc_file):
     # too much side-effects; so doing it manually then:
     #
     #objs = bpy.data.objects
-    #[objs.remove(objs[obj], do_unlink=True) for obj in ["Cube", "Light", "Camera"] 
+    #[objs.remove(objs[obj], do_unlink=True) for obj in ["Cube", "Light", "Camera"]
 
     default_collection = bpy.data.collections.get('Collection')
 

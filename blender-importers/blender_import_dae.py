@@ -54,6 +54,24 @@ if os.path.isfile(content_file):
     #
     bpy.ops.wm.collada_import( filepath=content_file )
 
+    # Select the first object found:
+    obj_to_select = bpy.data.objects[0]
+    obj_to_select.select_set(True)
+
+    bpy.context.view_layer.objects.active = obj_to_select
+    #bpy.ops.view3d.view_all(use_all_regions=True, center=True)
+    #original_type = bpy.context.area.type
+    #bpy.context.area.type = "VIEW_3D"
+    #bpy.ops.object.origin_set(type='GEOMETRY_ORIGIN')
+    #bpy.context.area.type = original_type
+
+    # As local view needs a VIEW_3D context:
+    for area in bpy.context.screen.areas:
+        if area.type == 'VIEW_3D':
+            override = bpy.context.copy()
+            override["area"] = area
+            bpy.ops.view3d.localview(override)
+
     # To export blend file:
     #bpy.ops.wm.save_mainfile( filepath = yourBlendFilePath )
 
