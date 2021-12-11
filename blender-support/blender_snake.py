@@ -1,26 +1,7 @@
 #!/usr/bin/env python3
 
-# Script to import content in Blender.
-
-# Following file formats are supported:
-#  - glTF 2.0 (extensions: '*.gltf'/'*.glb')
-#  - Collada/DAE (extension: '*.dae')
-#  - FBX (extension: '*.fbx')
-#  - IFC (extension: '*.ifc')
-
-
-# This script is not meant to be directly executed / interpreted; it is expected
-# to be run as:
-#
-# $(BLENDER) --python blender_import_dae.py -- "$(MY_DAE_FILE)", possibly
-# (preferably) through Ceylan's Hull blender-import.sh script.
-#
-# Refer to http://hull.esperide.org for further information.
-#
-# So no need to hack around with PYTHONPATH, pip, etc. to secure bpy, _bpy, etc.
-
-# IFC prerequisite: the BIM add-on must have already been installed in Blender,
-# see https://blenderbim.org/.
+# A Ceylan-Snake module centralising common facilities for various other
+# import/conversion scripts.
 
 import bpy
 
@@ -29,16 +10,9 @@ import os.path
 
 from enum import Enum, auto
 
-import importlib
-
-import logging
-import blenderbim.bim.import_ifc
-
-content_file = sys.argv[-1]
-
 
 class ContentFormat(Enum):
-    """Useful to describe the supported content formats"""
+    """Useful to describe the supported content formats."""
     GLTF = auto()
     COLLADA = auto()
     FBX = auto()
@@ -55,23 +29,16 @@ class ContentFormat(Enum):
 
 
 
-
-
-# Main program:
-
-
-# To stop on error, using 'sys.exit(Str)' as 'raise Exception(...' would not
-# be sufficient.
-
-
-if os.path.isfile(content_file):
+def setup_blender_blank_state():
+    """Sets an appropriate initial Blender initial state."""
 
     # Not wanting the default collection (with a default cube, light and
     # camera), yet 'bpy.ops.wm.read_factory_settings(use_empty=True)' induces
     # too much side-effects; so doing it manually then:
     #
     #objs = bpy.data.objects
-    #[objs.remove(objs[obj], do_unlink=True) for obj in ["Cube", "Light", "Camera"]
+    #[objs.remove(objs[obj], do_unlink=True)
+    #    obj in ["Cube", "Light", "Camera"]
 
     default_collection = bpy.data.collections.get('Collection')
 
@@ -83,6 +50,11 @@ if os.path.isfile(content_file):
     # No splash screen wanted either:
     if bpy.context.preferences.view.show_splash:
         bpy.context.preferences.view.show_splash = False
+
+
+
+def get_format(content_file):
+    """Returns the detected file format for the specified file."""
 
     extension = (os.path.splitext(content_file)[1]).lower()
     #print( "extension: %s" % (extension,))
@@ -97,10 +69,12 @@ if os.path.isfile(content_file):
     detected_format = format_dic.get(extension, ContentFormat.UNKNOWN)
     #print( "detected_format: %s" % (detected_format,))
 
-    if detected_format == ContentFormat.UNKNOWN:
-        sys.exit("    Error, the format of the specified content file '" + content_file + "' is not supported.")
+    return detected_format
 
-    print("### Requesting Blender to import the content in file '" + content_file + "', detected as being in the %s format..." % (ContentFormat.to_string(detected_format)))
+
+
+def import_content(content_file, content_format):
+    """Imports the specified content of specified format in Blender."""
 
     # Does not allow to import from a given directory (so a better option is to
     # define a bookmark in Blenders' 'File View'):
@@ -112,26 +86,24 @@ if os.path.isfile(content_file):
     # https://docs.blender.org/api/current/bpy.ops.import_scene.html
     #
 
-    if detected_format == ContentFormat.GLTF:
+    if content_format == ContentFormat.GLTF:
 
         bpy.ops.import_scene.gltf( filepath=content_file )
 
-    if detected_format == ContentFormat.COLLADA:
+    elif content_format == ContentFormat.COLLADA:
 
         bpy.ops.wm.collada_import( filepath=content_file )
 
-    elif detected_format == ContentFormat.FBX:
+    elif content_format == ContentFormat.FBX:
 
         bpy.ops.import_scene.fbx( filepath=content_file )
 
-    elif detected_format == ContentFormat.IFC:
+    elif content_format == ContentFormat.IFC:
 
         # Doc can be found here:
         # https://wiki.osarch.org/index.php?title=BlenderBIM_Add-on_code_examples#Import_an_IFC
 
         # Check add-on availability first:
-        bim_plugin_spec = importlib.util.find_spec("blenderbim")
-
         if not importlib.util.find_spec("blenderbim"):
             sys.exit("No Blender add-on available for BIM; refer to https://blenderbim.org/download.html")
 
@@ -141,6 +113,27 @@ if os.path.isfile(content_file):
 
         ifc_importer.execute()
 
+    else:
+        sys.exit("Error, the format ('" + ContentFormat.to_string(content_format) + "') for the specified content to import is not supported.")
+
+
+
+def export_content(target_file, target_format):
+    """Exports the current 3D content in the target file, using the target
+format.Focuses on the objects (as a whole) of the scene."""
+
+    # See https://docs.blender.org/api/current/bpy.ops.export_scene.html:
+    if target_format == ContentFormat.GLTF:
+
+        bpy.ops.export_scene.gltf(filepath=target_file, export_format='GLB')
+
+    else:
+        sys.exit("Error, the target format ('" + ContentFormat.to_string(target_format) + "') for the content to export is not supported.")
+
+
+
+def focus_on_objects():
+    """Focuses on the objects (as a whole) of the scene."""
 
     # Let's focus on all objects, by first selecting them all:
     #for obj in bpy.data.objects:
@@ -158,6 +151,3 @@ if os.path.isfile(content_file):
 
     # To export blend file:
     #bpy.ops.wm.save_mainfile( filepath=yourBlendFilePath )
-
-else:
-    sys.exit("Error, specified content file '" + content_file + "' could not be found.")
