@@ -8,6 +8,11 @@ import bpy
 import sys
 import os.path
 
+import importlib.util
+
+import blenderbim
+import logging
+
 from enum import Enum, auto
 
 
