@@ -6,6 +6,7 @@
 #  - glTF 2.0 (extensions: '*.gltf'/'*.glb')
 #  - Collada/DAE (extension: '*.dae')
 #  - FBX (extension: '*.fbx')
+#  - OBJ (extension: '*.obj')
 #  - IFC (extension: '*.ifc')
 
 
@@ -41,12 +42,9 @@ if not dir in sys.path:
 import blender_snake
 from blender_snake import ContentFormat
 
-import logging
-import blenderbim.bim.import_ifc
+# blenderbim imports made only if/when necessary.
 
 content_file = sys.argv[-1]
-
-
 
 
 # Main program:

@@ -10,10 +10,31 @@ import os.path
 
 import importlib.util
 
-import blenderbim
+# No to be done here, is imported conditionally (iff relevant, i.e. if having an
+# IFC file):
+#
+#import blenderbim
+
 import logging
 
 from enum import Enum, auto
+
+
+
+# Format management:
+#
+# FBX loader: Blender is not able to load various versions (ex: "Version 6100
+# unsupported, must be 7100 or later").
+#
+# Workaround:
+#
+# - use Autodesk FBX Converter: unfortunately it is no longer maintained, but it
+# can convert many file formats, up to FBX 2013 format (can be executed by
+# 'wine'); refer to
+# https://howtos.esperide.org/ThreeDimensional.html#conversions
+#
+# - a command-line file converter using the FBX SDK could be developed
+
 
 
 class ContentFormat(Enum):
@@ -21,6 +42,7 @@ class ContentFormat(Enum):
     GLTF = auto()
     COLLADA = auto()
     FBX = auto()
+    OBJ = auto()
     IFC = auto()
     UNKNOWN = auto()
 
@@ -28,6 +50,7 @@ class ContentFormat(Enum):
         format_dic = { ContentFormat.GLTF: "glTF 2.0",
                        ContentFormat.COLLADA: "Collada",
                        ContentFormat.FBX: "FBX",
+                       ContentFormat.OBJ: "Wavefront OBJ",
                        ContentFormat.IFC: "IFC",
                        ContentFormat.UNKNOWN: "unknown" }
         return format_dic[FormatEnum]
@@ -69,6 +92,7 @@ def get_format(content_file):
                   '.glb':  ContentFormat.GLTF,
                   '.dae':  ContentFormat.COLLADA,
                   '.fbx':  ContentFormat.FBX,
+                  '.obj':  ContentFormat.OBJ,
                   '.ifc':  ContentFormat.IFC }
 
     detected_format = format_dic.get(extension, ContentFormat.UNKNOWN)
@@ -93,7 +117,8 @@ def import_content(content_file, content_format):
 
     if content_format == ContentFormat.GLTF:
 
-        bpy.ops.import_scene.gltf( filepath=content_file )
+        # All log levels selected:
+        bpy.ops.import_scene.gltf( filepath=content_file, loglevel=-1 )
 
     elif content_format == ContentFormat.COLLADA:
 
@@ -101,7 +126,11 @@ def import_content(content_file, content_format):
 
     elif content_format == ContentFormat.FBX:
 
-        bpy.ops.import_scene.fbx( filepath=content_file )
+        bpy.ops.import_scene.fbx( filepath=content_file, use_image_search=True )
+
+    elif content_format == ContentFormat.OBJ:
+
+        bpy.ops.import_scene.obj( filepath=content_file, use_image_search=True )
 
     elif content_format == ContentFormat.IFC:
 
