@@ -21,7 +21,7 @@
 # So no need to hack around with PYTHONPATH, pip, etc. to secure bpy, _bpy, etc.
 
 # IFC prerequisite: the BIM add-on must have already been installed in Blender,
-# see https://blenderbim.org/.
+# see http://docs.bonsaibim.org/.
 
 import bpy
 
@@ -42,7 +42,25 @@ if not dir in sys.path:
 import blender_snake
 from blender_snake import ContentFormat
 
-# blenderbim imports made only if/when necessary.
+print(f"Import script arguments: {sys.argv}")
+
+read_only = False
+
+read_only_opt = "--read-only"
+
+# Removal works, yet Blender will still see this option and fail interpreting
+# it:
+#
+if read_only_opt in sys.argv:
+    sys.argv.remove(read_only_opt)
+    read_only = True
+
+
+#print(f"Updated args: {sys.argv}.")
+
+#print(f"Read-only import: {read_only}.")
+
+# Bonsai imports made only if/when necessary.
 
 content_file = sys.argv[-1]
 
@@ -50,11 +68,13 @@ content_file = sys.argv[-1]
 # Main program:
 
 
-# To stop on error, using 'sys.exit(Str)' as 'raise Exception(...' would not
+# To stop on error, using 'sys.exit(Str)', as 'raise Exception(...' would not
 # be sufficient.
 
 
 if os.path.isfile(content_file):
+
+    #print(f"Content file: '{content_file}'.")
 
     blender_snake.setup_blender_blank_state()
 
@@ -65,7 +85,7 @@ if os.path.isfile(content_file):
 
     print("### Requesting Blender to import the content in file '" + content_file + "', detected as being in the %s format..." % (ContentFormat.to_string(detected_format)))
 
-    blender_snake.import_content(content_file, detected_format)
+    blender_snake.import_content(content_file, detected_format, read_only)
 
     blender_snake.focus_on_objects()
 

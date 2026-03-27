@@ -102,8 +102,13 @@ def get_format(content_file):
 
 
 
-def import_content(content_file, content_format):
+def import_content(content_file_path, content_format, prevent_any_saving=False):
     """Imports the specified content of specified format in Blender."""
+
+    print(f"Importing in Blender '{content_file_path}', as {content_format}.")
+
+    if prevent_any_saving:
+        prevent_any_saving()
 
     # Does not allow to import from a given directory (so a better option is to
     # define a bookmark in Blenders' 'File View'):
@@ -113,39 +118,48 @@ def import_content(content_file, content_format):
 
     # Doc can generally be found here:
     # https://docs.blender.org/api/current/bpy.ops.import_scene.html
-    #
 
     if content_format == ContentFormat.GLTF:
 
         # All log levels selected:
-        bpy.ops.import_scene.gltf( filepath=content_file, loglevel=-1 )
+        bpy.ops.import_scene.gltf( filepath=content_file_path, loglevel=-1 )
 
     elif content_format == ContentFormat.COLLADA:
 
-        bpy.ops.wm.collada_import( filepath=content_file )
+        bpy.ops.wm.collada_import( filepath=content_file_path )
 
     elif content_format == ContentFormat.FBX:
 
-        bpy.ops.import_scene.fbx( filepath=content_file, use_image_search=True )
+        bpy.ops.import_scene.fbx( filepath=content_file_path, use_image_search=True )
 
     elif content_format == ContentFormat.OBJ:
 
-        bpy.ops.import_scene.obj( filepath=content_file, use_image_search=True )
+        bpy.ops.import_scene.obj( filepath=content_file_path, use_image_search=True )
 
     elif content_format == ContentFormat.IFC:
+
+        # If getting 'AttributeError: Calling operator
+        # "bpy.ops.bim.load_project" error, could not be found', then Bonsai is
+        # not installed.
+
+        # Previously:
 
         # Doc can be found here:
         # https://wiki.osarch.org/index.php?title=BlenderBIM_Add-on_code_examples#Import_an_IFC
 
         # Check add-on availability first:
-        if not importlib.util.find_spec("blenderbim"):
-            sys.exit("No Blender add-on available for BIM; refer to https://blenderbim.org/download.html")
+        #if not importlib.util.find_spec("blenderbim"):
+        #    sys.exit("No Blender add-on available for BIM; refer to https://blenderbim.org/download.html")
 
-        ifc_import_settings = blenderbim.bim.import_ifc.IfcImportSettings.factory(bpy.context, content_file, logging.getLogger('ImportIFC'))
+        #ifc_import_settings = blenderbim.bim.import_ifc.IfcImportSettings.factory(bpy.context, content_file_path, logging.getLogger('ImportIFC'))
 
-        ifc_importer = blenderbim.bim.import_ifc.IfcImporter(ifc_import_settings)
+        #ifc_importer = blenderbim.bim.import_ifc.IfcImporter(ifc_import_settings)
 
-        ifc_importer.execute()
+        #ifc_importer.execute()
+
+        # Nowadays (e.g. Blender 4.4.3 / Bonsai version 0.8.4):
+        bpy.ops.bim.load_project(filepath=content_file_path)
+
 
     else:
         sys.exit("Error, the format ('" + ContentFormat.to_string(content_format) + "') for the specified content to import is not supported.")
@@ -185,3 +199,12 @@ def focus_on_objects():
 
     # To export blend file:
     #bpy.ops.wm.save_mainfile( filepath=yourBlendFilePath )
+
+
+def prevent_any_saving():
+    print("Enabling Blender read-only mode.")
+    # chmod a-w foo.ifc could be of use as well.
+    do_nothing = lambda *a,**k: None
+    bpy.ops.wm.save_mainfile = do_nothing
+    bpy.ops.bim.save_project = do_nothing
+    bpy.ops.bim.save_project_as = do_nothing
